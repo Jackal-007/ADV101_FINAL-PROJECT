@@ -18,7 +18,6 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Navigation */}
             <nav className="bg-white shadow-sm border-b">
                 <div className="container mx-auto px-4">
                     <div className="flex justify-between items-center py-4">
@@ -44,7 +43,6 @@ export default function Home() {
 
             <div className="container mx-auto px-4 py-8">
                 {user ? (
-                    // Simple dashboard for logged-in users
                     <div className="max-w-4xl mx-auto text-center">
                         <h1 className="text-4xl font-bold text-gray-800 mb-4">Dashboard</h1>
                         <p className="text-gray-600 mb-8">
@@ -57,10 +55,12 @@ export default function Home() {
                             <p className="text-gray-600">
                                 You are now logged in as <strong>{user.username}</strong>.
                             </p>
+                            <p className="text-gray-600 mt-2">
+                                This is the dashboard page that users see after logging in.
+                            </p>
                         </div>
                     </div>
                 ) : (
-                    // Auth forms for non-logged-in users
                     <div>
                         <header className="text-center mb-8">
                             <h1 className="text-4xl font-bold text-orange-600">🍳 Recipe Hub</h1>
@@ -69,7 +69,6 @@ export default function Home() {
                             </p>
                         </header>
 
-                        {/* Toggle between Login and Register */}
                         <div className="max-w-md mx-auto mb-6">
                             <div className="flex bg-gray-100 rounded-lg p-1">
                                 <button
@@ -95,7 +94,6 @@ export default function Home() {
                             </div>
                         </div>
 
-                        {/* Show appropriate form */}
                         {showLogin ? <LoginForm /> : <RegistrationForm />}
                     </div>
                 )}
