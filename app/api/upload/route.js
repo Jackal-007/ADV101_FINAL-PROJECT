@@ -14,7 +14,7 @@ export async function POST(request) {
             );
         }
 
-        // Validate file type
+
         if (!file.type.startsWith('image/')) {
             return NextResponse.json(
                 { error: 'File must be an image' },
@@ -22,11 +22,11 @@ export async function POST(request) {
             );
         }
 
-        // Convert file to buffer
+
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Create uploads directory if it doesn't exist
+
         const uploadsDir = path.join(process.cwd(), 'public/uploads');
         try {
             await mkdir(uploadsDir, { recursive: true });
@@ -34,16 +34,16 @@ export async function POST(request) {
             console.log('Uploads directory already exists');
         }
 
-        // Generate unique filename
+
         const timestamp = Date.now();
         const extension = path.extname(file.name);
         const filename = `recipe_${timestamp}${extension}`;
         const filepath = path.join(uploadsDir, filename);
 
-        // Save file
+
         await writeFile(filepath, buffer);
 
-        // Return file URL for database storage
+
         const fileUrl = `/uploads/${filename}`;
         
         return NextResponse.json({ 

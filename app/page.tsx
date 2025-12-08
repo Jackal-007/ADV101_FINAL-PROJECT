@@ -6,7 +6,7 @@ import RecipeForm from '../components/RecipeForm';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-// Add this interface for recipe data
+
 interface Recipe {
   id: string;
   title: string;
@@ -15,19 +15,19 @@ interface Recipe {
   difficulty: string;
   servings: number;
   username: string;
-  user_id: string; // Add this to check ownership
-  recipe_image?: string; // ADD THIS LINE
+  user_id: string; 
+  recipe_image?: string; 
 }
 
 export default function Home() {
-    const { user, logout, loading, token } = useAuth(); // Make sure token is available
+    const { user, logout, loading, token } = useAuth(); 
     const [showLogin, setShowLogin] = useState(false);
     const [showRecipeForm, setShowRecipeForm] = useState(false);
     const [activeTab, setActiveTab] = useState('browse');
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [recipesLoading, setRecipesLoading] = useState(true);
 
-    // Fetch recipes when user is logged in and on browse tab
+
     useEffect(() => {
         if (user && activeTab === 'browse') {
             fetchRecipes();
@@ -54,7 +54,7 @@ export default function Home() {
         fetchRecipes();
     };
 
-    // Add delete function
+
     const handleDeleteRecipe = async (recipeId: string) => {
         if (!confirm('Are you sure you want to delete this recipe?')) {
             return;
@@ -69,7 +69,7 @@ export default function Home() {
             });
 
             if (res.ok) {
-                // Remove the recipe from the local state
+
                 setRecipes(recipes.filter(recipe => recipe.id !== recipeId));
                 alert('Recipe deleted successfully');
             } else {
@@ -92,7 +92,7 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Navigation - Keep exactly as is */}
+
             <nav className="bg-white shadow-sm border-b">
                 <div className="container mx-auto px-4">
                     <div className="flex justify-between items-center py-4">
@@ -118,9 +118,9 @@ export default function Home() {
 
             <div className="container mx-auto px-4 py-8">
                 {user ? (
-                    // User is logged in - show recipe features
+
                     <div>
-                        {/* Tab Navigation - Keep exactly as is */}
+
                         <div className="max-w-4xl mx-auto mb-8">
                             <div className="flex bg-gray-100 rounded-lg p-1">
                                 <button
@@ -146,7 +146,7 @@ export default function Home() {
                             </div>
                         </div>
 
-                        {/* Tab Content - Add delete button to recipe cards */}
+
                         {activeTab === 'browse' ? (
                             <div className="max-w-4xl mx-auto">
                                 <div className="text-center">
@@ -170,7 +170,7 @@ export default function Home() {
 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
   {recipes.map((recipe) => (
     <div key={recipe.id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden relative">
-      {/* Delete button - only show if user owns the recipe */}
+
       {recipe.user_id === user.userId && (
         <button
           onClick={() => handleDeleteRecipe(recipe.id)}
@@ -185,7 +185,7 @@ export default function Home() {
       
       <Link href={`/recipes/${recipe.id}`}>
         <div className="cursor-pointer">
-          {/* ADD IMAGE SECTION HERE */}
+
           {recipe.recipe_image ? (
             <div className="w-full h-48 overflow-hidden">
               <img 
@@ -240,7 +240,7 @@ export default function Home() {
                         )}
                     </div>
                 ) : (
-                    // User is not logged in - show auth forms (keep exactly as is)
+
                     <div>
                         <header className="text-center mb-8">
                             <h1 className="text-4xl font-bold text-orange-600">🍳 Recipe Hub</h1>
@@ -249,7 +249,7 @@ export default function Home() {
                             </p>
                         </header>
 
-                        {/* Toggle between Login and Register */}
+
                         <div className="max-w-md mx-auto mb-6">
                             <div className="flex bg-gray-100 rounded-lg p-1">
                                 <button
@@ -275,7 +275,7 @@ export default function Home() {
                             </div>
                         </div>
 
-                        {/* Show appropriate form */}
+
                         {showLogin ? <LoginForm /> : <RegistrationForm />}
                     </div>
                 )}

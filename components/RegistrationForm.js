@@ -29,7 +29,7 @@ export default function RegistrationForm() {
         setError('');
         setMessage('');
 
-        // Validation
+
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             setLoading(false);

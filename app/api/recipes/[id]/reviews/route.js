@@ -1,20 +1,18 @@
-// app/api/recipes/[id]/reviews/route.js - URL PARSING VERSION
 import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-// POST a new review
+
 export async function POST(request) {
     try {
-        // EXTRACT recipeId FROM URL - RELIABLE METHOD
+
         const url = new URL(request.url);
         console.log('🔍 Full URL:', url.pathname);
         
-        // Parse the URL path to get recipeId
+
         const pathParts = url.pathname.split('/');
         console.log('🔍 Path parts:', pathParts);
         
-        // The URL pattern is: /api/recipes/[id]/reviews
-        // So recipeId should be at index 3 (0: "", 1: "api", 2: "recipes", 3: "[id]", 4: "reviews")
+
         const recipeId = pathParts[3];
         
         console.log('=== URL PARSING REVIEW API ===');
@@ -35,7 +33,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Invalid Recipe ID' }, { status: 400 });
         }
 
-        // Validate other parameters
+
         if (body.user_id === undefined) {
             console.log('❌ user_id is missing');
             return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
@@ -45,7 +43,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Rating is required' }, { status: 400 });
         }
 
-        // Convert and validate parameters
+
         const user_id = parseInt(body.user_id);
         const rating = parseInt(body.rating);
         const comment = body.comment || '';
@@ -56,7 +54,7 @@ export async function POST(request) {
         console.log('   - rating:', rating);
         console.log('   - comment:', comment);
 
-        // Final validation
+
         if (isNaN(user_id) || isNaN(rating) || rating < 1 || rating > 5) {
             console.log('❌ Parameter validation failed');
             return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
@@ -64,7 +62,7 @@ export async function POST(request) {
 
         console.log('5. All parameters validated. Inserting into database...');
 
-        // Insert review with validated parameters
+
         const result = await query(
             `INSERT INTO reviews (user_id, recipe_id, rating, comment, created_at) 
              VALUES (?, ?, ?, ?, NOW())`,
@@ -87,10 +85,10 @@ export async function POST(request) {
     }
 }
 
-// GET all reviews for a recipe - USING URL PARSING
+
 export async function GET(request) {
     try {
-        // EXTRACT recipeId FROM URL
+
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/');
         const recipeId = pathParts[3];

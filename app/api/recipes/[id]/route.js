@@ -1,14 +1,13 @@
-// app/api/recipes/[id]/route.js
 import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
     try {
-        // Await the params promise
+
         const { id } = await params;
         console.log('🔍 Fetching recipe with ID:', id, 'Type:', typeof id);
 
-        // Validate ID
+
         if (!id || id === 'undefined' || id === 'null') {
             console.log('❌ Invalid recipe ID:', id);
             return NextResponse.json({ error: 'Invalid recipe ID' }, { status: 400 });
@@ -22,7 +21,7 @@ export async function GET(request, { params }) {
 
         console.log('🔍 Using recipe ID:', recipeId);
 
-        // Get recipe basic info
+
         const recipes = await query(`
             SELECT r.*, u.username 
             FROM recipes r 
@@ -40,14 +39,14 @@ export async function GET(request, { params }) {
         const recipe = recipes[0];
         console.log('✅ Found recipe:', recipe.title);
 
-        // Get ingredients
+
         const ingredients = await query(
             'SELECT name, quantity, unit FROM ingredients WHERE recipe_id = ? ORDER BY sort_order, id',
             [recipeId]
         );
         console.log('🥬 Ingredients found:', ingredients.length);
 
-        // Get instructions
+
         const instructions = await query(
             'SELECT description FROM instructions WHERE recipe_id = ? ORDER BY step_number',
             [recipeId]
@@ -67,11 +66,11 @@ export async function GET(request, { params }) {
 
 export async function DELETE(request, { params }) {
     try {
-        // Await the params promise
+
         const { id } = await params;
         console.log('🗑️ Deleting recipe with ID:', id);
 
-        // Validate ID
+
         if (!id || id === 'undefined' || id === 'null') {
             console.log('❌ Invalid recipe ID for deletion:', id);
             return NextResponse.json({ error: 'Invalid recipe ID' }, { status: 400 });
@@ -83,7 +82,7 @@ export async function DELETE(request, { params }) {
             return NextResponse.json({ error: 'Invalid recipe ID' }, { status: 400 });
         }
 
- // **REMOVED TRANSACTIONS** - Use simple sequential deletes instead
+
         console.log('🗑️ Deleting ingredients...');
         await query('DELETE FROM ingredients WHERE recipe_id = ?', [recipeId]);
         

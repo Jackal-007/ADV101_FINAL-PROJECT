@@ -28,7 +28,7 @@ export default function LoginForm() {
         const result = await login(formData.email, formData.password);
 
         if (result.success) {
-            // Login successful - the AuthContext will handle redirect/state
+
             setFormData({ email: '', password: '' });
         } else {
             setError(result.message);

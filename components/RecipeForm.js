@@ -17,7 +17,7 @@ export default function RecipeForm({ onSuccess }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Fix: Add parameter type comment
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -25,7 +25,7 @@ export default function RecipeForm({ onSuccess }) {
         });
     };
 
-    // Fix: Add parameter type comments
+
     const handleIngredientChange = (index, field, value) => {
         const updatedIngredients = [...formData.ingredients];
         updatedIngredients[index][field] = value;
@@ -35,7 +35,7 @@ export default function RecipeForm({ onSuccess }) {
         });
     };
 
-    // Fix: Add parameter type comments
+
     const handleInstructionChange = (index, value) => {
         const updatedInstructions = [...formData.instructions];
         updatedInstructions[index] = value;
@@ -45,7 +45,7 @@ export default function RecipeForm({ onSuccess }) {
         });
     };
 
-    // Fix: Add parameter type comment
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -65,7 +65,7 @@ export default function RecipeForm({ onSuccess }) {
         }
     };
 
-    // Fix: Add try-catch block and parameter type
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -74,7 +74,7 @@ export default function RecipeForm({ onSuccess }) {
         console.log('🔍 Current user in RecipeForm:', user);
         console.log('🔍 User ID:', user?.id);
 
-        // Filter out empty ingredients and instructions
+
         const filteredIngredients = formData.ingredients.filter(ing => 
             ing.name.trim() !== '' || ing.quantity.trim() !== ''
         );
@@ -85,7 +85,7 @@ export default function RecipeForm({ onSuccess }) {
         try {
             let imageUrl = null;
             
-            // Upload image first if exists
+
             if (formData.recipeImage) {
                 const imageFormData = new FormData();
                 imageFormData.append('file', formData.recipeImage);
@@ -131,7 +131,7 @@ export default function RecipeForm({ onSuccess }) {
             const result = await response.json();
             onSuccess(result.recipeId);
             
-            // Reset form
+
             setFormData({
                 title: '',
                 description: '',
@@ -150,7 +150,7 @@ export default function RecipeForm({ onSuccess }) {
         }
     };
 
-    // Add new ingredient field
+
     const addIngredient = () => {
         setFormData({
             ...formData,
@@ -158,7 +158,7 @@ export default function RecipeForm({ onSuccess }) {
         });
     };
 
-    // Remove ingredient field
+
     const removeIngredient = (index) => {
         if (formData.ingredients.length > 1) {
             const updatedIngredients = formData.ingredients.filter((_, i) => i !== index);
@@ -169,7 +169,7 @@ export default function RecipeForm({ onSuccess }) {
         }
     };
 
-    // Add new instruction field
+
     const addInstruction = () => {
         setFormData({
             ...formData,
@@ -177,7 +177,7 @@ export default function RecipeForm({ onSuccess }) {
         });
     };
 
-    // Remove instruction field
+
     const removeInstruction = (index) => {
         if (formData.instructions.length > 1) {
             const updatedInstructions = formData.instructions.filter((_, i) => i !== index);
@@ -199,7 +199,7 @@ export default function RecipeForm({ onSuccess }) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Basic Information */}
+
                 <div className="grid grid-cols-1 gap-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -299,7 +299,7 @@ export default function RecipeForm({ onSuccess }) {
                     </div>
                 </div>
 
-                {/* Ingredients Section */}
+
                 <div className="border-t pt-6">
                     <div className="flex justify-between items-center mb-4">
                         <label className="block text-lg font-semibold text-gray-800">
@@ -353,7 +353,7 @@ export default function RecipeForm({ onSuccess }) {
                     </div>
                 </div>
 
-                {/* Instructions Section */}
+
                 <div className="border-t pt-6">
                     <div className="flex justify-between items-center mb-4">
                         <label className="block text-lg font-semibold text-gray-800">
@@ -398,7 +398,7 @@ export default function RecipeForm({ onSuccess }) {
                     </div>
                 </div>
 
-                {/* Submit Button */}
+
                 <div className="border-t pt-6">
                     <button
                         type="submit"

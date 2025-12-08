@@ -1,4 +1,3 @@
-// app/api/recipes/create/route.js - COMPLETELY FIXED
 import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
@@ -7,7 +6,7 @@ export async function POST(request) {
         const body = await request.json();
         console.log('Received recipe data:', body);
 
-        // Basic validation
+
         if (!body.title || !body.description || !body.cookingTime || !body.servings) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
@@ -15,24 +14,23 @@ export async function POST(request) {
             );
         }
 
-        // Get user from token
+
         const token = request.headers.get('authorization')?.replace('Bearer ', '');
         if (!token) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // You need to implement verifyToken in lib/auth.js
-        // For now, let's get user ID from the request body as a temporary fix
-        const user_id = body.user_id || 1; // TEMPORARY - replace with actual auth
+
+        const user_id = body.user_id || 1; 
         
         console.log('📝 Creating recipe for user:', user_id);
 
-        // Convert difficulty to match your enum (Easy, Medium, Hard)
+
         const difficulty = body.difficulty.charAt(0).toUpperCase() + body.difficulty.slice(1);
 
         console.log('📝 Creating recipe without transaction...');
 
-        // 1. Insert the main recipe - FIXED SYNTAX
+
         const recipeResult = await query(
             `INSERT INTO recipes (user_id, title, description, cooking_time, difficulty, servings, recipe_image) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -50,7 +48,7 @@ export async function POST(request) {
         const recipeId = recipeResult.insertId;
         console.log('✅ Recipe created with ID:', recipeId);
 
-        // 2. Insert ingredients
+
         if (body.ingredients && body.ingredients.length > 0) {
             let sortOrder = 0;
             for (const ingredient of body.ingredients) {
@@ -71,7 +69,7 @@ export async function POST(request) {
             console.log('✅ Ingredients added:', body.ingredients.length);
         }
 
-        // 3. Insert instructions
+
         if (body.instructions && body.instructions.length > 0) {
             let stepNumber = 1;
             for (const instruction of body.instructions) {

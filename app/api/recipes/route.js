@@ -1,4 +1,3 @@
-// app/api/recipes/route.js
 import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
@@ -11,7 +10,7 @@ export async function GET() {
             ORDER BY r.created_at DESC
         `);
         
-        // For each recipe, get ingredients and instructions
+
         for (let recipe of recipes) {
             const ingredients = await query(
                 'SELECT name, quantity, unit FROM ingredients WHERE recipe_id = ? ORDER BY sort_order, id',

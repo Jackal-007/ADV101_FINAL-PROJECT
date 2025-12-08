@@ -30,7 +30,7 @@ export default function RecipeDetail() {
     const { user, token } = useAuth();
     const recipeId = params.id as string;
     
-    // State declarations
+
     const [recipe, setRecipe] = useState<Recipe | null>(null);
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
@@ -167,7 +167,7 @@ export default function RecipeDetail() {
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-4xl mx-auto p-6">
-                {/* Recipe Content */}
+
                 <div className="bg-white rounded-lg shadow-md p-8 relative">
                     <h1 className="text-4xl font-bold text-gray-800 mb-4 pr-32">{recipe.title}</h1>
                     <p className="text-gray-600 text-lg mb-6">{recipe.description}</p>
@@ -217,7 +217,7 @@ export default function RecipeDetail() {
                         </div>
                     </div>
 
-                    {/* Reviews Section */}
+
                     <div className="mt-12 border-t pt-8">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-semibold text-gray-800">Reviews</h2>
@@ -229,7 +229,7 @@ export default function RecipeDetail() {
                             </button>
                         </div>
 
-                        {/* Review Form */}
+
                         {showReviewForm && (
                             <form onSubmit={handleSubmitReview} className="bg-gray-50 p-6 rounded-lg mb-6">
                                 <div className="mb-4">
@@ -267,7 +267,7 @@ export default function RecipeDetail() {
                             </form>
                         )}
 
-                        {/* Reviews List */}
+
                         <div className="space-y-6">
                             {reviews.length === 0 ? (
                                 <p className="text-gray-500 text-center py-4">No reviews yet. Be the first to review!</p>
@@ -302,7 +302,7 @@ export default function RecipeDetail() {
                     </div>
                 </div>
 
-                {/* Action Buttons */}
+
                 <div className="mt-8 flex justify-center gap-4">
                     <button
                         onClick={handleBackToRecipes}

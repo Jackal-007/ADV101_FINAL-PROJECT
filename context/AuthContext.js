@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
         try {
             const token = localStorage.getItem('token');
             if (token) {
-                // You could verify the token with backend here
+
                 const userData = JSON.parse(localStorage.getItem('userData'));
                 setUser(userData);
             }

@@ -5,7 +5,7 @@ export async function POST(request) {
     try {
         const { username, email, password } = await request.json();
 
-        // Validation
+
         if (!username || !email || !password) {
             return Response.json({ message: 'All fields are required' }, { status: 400 });
         }
@@ -14,7 +14,7 @@ export async function POST(request) {
             return Response.json({ message: 'Password must be at least 6 characters' }, { status: 400 });
         }
 
-        // Check if user exists
+
         const existingUser = await query(
             'SELECT id FROM users WHERE email = ? OR username = ?',
             [email, username]
@@ -24,7 +24,7 @@ export async function POST(request) {
             return Response.json({ message: 'User already exists' }, { status: 409 });
         }
 
-        // Create user
+
         const hashedPassword = await hashPassword(password);
         const result = await query(
             'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
