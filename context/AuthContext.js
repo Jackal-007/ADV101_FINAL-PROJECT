@@ -27,14 +27,14 @@ export function AuthProvider({ children }) {
     };
 
     const login = async (email, password) => {
-        try {
-            const response = await fetch('http://localhost:3000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
+    try {
+        const response = await fetch('/api/auth/login', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
 
             if (response.ok) {
                 const data = await response.json();
@@ -52,14 +52,14 @@ export function AuthProvider({ children }) {
     };
 
     const register = async (userData) => {
-        try {
-            const response = await fetch('http://localhost:3000/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData),
-            });
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        });
 
             if (response.ok) {
                 return { success: true, message: 'Registration successful' };
