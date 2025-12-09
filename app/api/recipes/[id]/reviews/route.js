@@ -105,7 +105,7 @@ export async function GET(request) {
         }
         
         const reviews = await query(`
-            SELECT r.*, u.username 
+            SELECT r.*, u.username, u.id as user_id 
             FROM reviews r 
             JOIN users u ON r.user_id = u.id 
             WHERE r.recipe_id = ? 

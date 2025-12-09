@@ -14,9 +14,12 @@ export function AuthProvider({ children }) {
     const checkAuthStatus = async () => {
         try {
             const token = localStorage.getItem('token');
+            console.log('🔐 Checking auth status, token exists:', !!token);
+            
             if (token) {
-
                 const userData = JSON.parse(localStorage.getItem('userData'));
+                console.log('🔐 User data from localStorage:', userData);
+                console.log('🔐 User ID from localStorage:', userData?.id);
                 setUser(userData);
             }
         } catch (error) {
@@ -27,17 +30,23 @@ export function AuthProvider({ children }) {
     };
 
     const login = async (email, password) => {
-    try {
-        const response = await fetch('/api/auth/login', { 
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-        });
+        try {
+            const response = await fetch('/api/auth/login', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
 
             if (response.ok) {
                 const data = await response.json();
+                
+
+                console.log('🔐 Login successful, token received:', data.token);
+                console.log('🔐 User data received:', data.user);
+                console.log('🔐 User ID:', data.user?.id);
+                
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('userData', JSON.stringify(data.user));
                 setUser(data.user);
@@ -52,14 +61,14 @@ export function AuthProvider({ children }) {
     };
 
     const register = async (userData) => {
-    try {
-        const response = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-        });
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            });
 
             if (response.ok) {
                 return { success: true, message: 'Registration successful' };
@@ -73,9 +82,18 @@ export function AuthProvider({ children }) {
     };
 
     const logout = () => {
+        console.log('🔐 Logging out, clearing token');
         localStorage.removeItem('token');
         localStorage.removeItem('userData');
         setUser(null);
+    };
+
+
+    const getToken = () => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('token');
+        }
+        return null;
     };
 
     return (
@@ -84,7 +102,8 @@ export function AuthProvider({ children }) {
             login,
             register,
             logout,
-            loading
+            loading,
+            token: getToken() 
         }}>
             {children}
         </AuthContext.Provider>

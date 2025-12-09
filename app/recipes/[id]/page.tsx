@@ -18,6 +18,7 @@ interface Recipe {
 
 interface Review {
     id: number;
+    user_id: string;
     username: string;
     rating: number;
     comment: string;
@@ -159,6 +160,53 @@ export default function RecipeDetail() {
         }
     };
 
+    const handleDeleteReview = async (reviewId: number) => {
+    console.log('🔍 handleDeleteReview called with reviewId:', reviewId);
+    
+    if (!confirm('Are you sure you want to delete this review?')) {
+        return;
+    }
+
+    try {
+        console.log(`🗑️ Deleting review ${reviewId}...`);
+        console.log('Current user:', user);
+        console.log('Token exists:', !!token);
+        
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
+
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        } else {
+            alert('You need to be logged in to delete reviews');
+            return;
+        }
+
+        const response = await fetch(`/api/reviews/${reviewId}`, {
+            method: 'DELETE',
+            headers: headers
+        });
+
+        console.log('Response status:', response.status);
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        if (response.ok) {
+
+            setReviews(reviews.filter(review => review.id !== reviewId));
+            alert('Review deleted successfully!');
+        } else {
+            alert(data.error || 'Failed to delete review');
+        }
+    } catch (error: any) {
+        console.error('❌ Error deleting review:', error);
+        alert(`Failed to delete review: ${error.message}`);
+    }
+};
+
     const isRecipeOwner = user && recipe && recipe.user_id === user.id;
 
     if (loading) return <div className="text-center p-8">Loading...</div>;
@@ -273,23 +321,39 @@ export default function RecipeDetail() {
                                 <p className="text-gray-500 text-center py-4">No reviews yet. Be the first to review!</p>
                             ) : (
                                 reviews.map((review) => (
-                                    <div key={review.id} className="border-b pb-4">
+                                    <div key={review.id} className="border-b pb-4 group hover:bg-gray-50 px-4 py-2 rounded-lg transition-colors">
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="font-semibold text-gray-800">{review.username}</span>
-                                            <div className="flex items-center">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className={i < review.rating ? 'text-yellow-500' : 'text-gray-300'}
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <span
+                                                            key={i}
+                                                            className={i < review.rating ? 'text-yellow-500' : 'text-gray-300 text-lg'}
+                                                        >
+                                                            ★
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                                
+                                                {user && review.user_id === user.id && (
+                                                    <button
+                                                        onClick={() => handleDeleteReview(review.id)}
+                                                        className="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                                                        title="Delete your review"
                                                     >
-                                                        ★
-                                                    </span>
-                                                ))}
+                                                        Delete
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
-                                        <p className="text-gray-700">{review.comment}</p>
-                                        <p className="text-gray-500 text-sm mt-2">
-                                            {new Date(review.created_at).toLocaleDateString()}
+                                        <p className="text-gray-700 mb-2">{review.comment}</p>
+                                        <p className="text-gray-500 text-sm">
+                                            {new Date(review.created_at).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })}
                                         </p>
                                     </div>
                                 ))
