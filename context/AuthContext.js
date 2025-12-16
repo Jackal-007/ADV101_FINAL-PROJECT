@@ -29,6 +29,37 @@ export function AuthProvider({ children }) {
         }
     };
 
+    const updateUserData = (updatedUserData) => {
+        console.log('🔐 Updating user data in context:', updatedUserData);
+        setUser(updatedUserData);
+        localStorage.setItem('userData', JSON.stringify(updatedUserData));
+    };
+
+    const refreshUserData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+            
+            console.log('🔐 Refreshing user data from server...');
+            const response = await fetch('/api/users/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                const userData = data.user;
+                console.log('🔐 Refreshed user data:', userData);
+                updateUserData(userData);
+                return userData;
+            }
+        } catch (error) {
+            console.error('Error refreshing user data:', error);
+        }
+        return null;
+    };
+
     const login = async (email, password) => {
         try {
             const response = await fetch('/api/auth/login', { 
@@ -41,8 +72,6 @@ export function AuthProvider({ children }) {
 
             if (response.ok) {
                 const data = await response.json();
-                
-
                 console.log('🔐 Login successful, token received:', data.token);
                 console.log('🔐 User data received:', data.user);
                 console.log('🔐 User ID:', data.user?.id);
@@ -88,7 +117,6 @@ export function AuthProvider({ children }) {
         setUser(null);
     };
 
-
     const getToken = () => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('token');
@@ -103,7 +131,9 @@ export function AuthProvider({ children }) {
             register,
             logout,
             loading,
-            token: getToken() 
+            token: getToken(),
+            updateUserData,    
+            refreshUserData    
         }}>
             {children}
         </AuthContext.Provider>

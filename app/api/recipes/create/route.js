@@ -1,47 +1,51 @@
 import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { verifyToken } from '@/lib/auth';
 
 export async function POST(request) {
     try {
+        const authHeader = request.headers.get('authorization');
+        if (!authHeader?.startsWith('Bearer ')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        
+        const token = authHeader.split(' ')[1];
+        
+        const decoded = verifyToken(token);
+        if (!decoded) {
+            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+        }
+        
+        const user_id = decoded.userId || decoded.id;
+        console.log('🔑 Creating recipe for authenticated user:', user_id);
+        
         const body = await request.json();
-        console.log('Received recipe data:', body);
+        console.log('📦 Received recipe data:', body);
 
-
-        if (!body.title || !body.description || !body.cookingTime || !body.servings) {
+        if (!body.title || !body.description || !body.cooking_time || !body.servings) {
             return NextResponse.json(
-                { error: 'Missing required fields' },
+                { error: 'Missing required fields: title, description, cooking_time, servings' },
                 { status: 400 }
             );
         }
 
+        const difficulty = body.difficulty ? 
+            body.difficulty.charAt(0).toUpperCase() + body.difficulty.slice(1) : 
+            'Medium';
 
-        const token = request.headers.get('authorization')?.replace('Bearer ', '');
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-
-        const user_id = body.user_id || 1; 
-        
         console.log('📝 Creating recipe for user:', user_id);
-
-
-        const difficulty = body.difficulty.charAt(0).toUpperCase() + body.difficulty.slice(1);
-
-        console.log('📝 Creating recipe without transaction...');
-
 
         const recipeResult = await query(
             `INSERT INTO recipes (user_id, title, description, cooking_time, difficulty, servings, recipe_image) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
-                user_id,
+                user_id,  
                 body.title,
                 body.description,
-                body.cookingTime,
+                parseInt(body.cooking_time),
                 difficulty,
-                body.servings,
-                body.recipeImage || null
+                parseInt(body.servings),
+                body.recipe_image || null 
             ]
         );
 
@@ -49,10 +53,12 @@ export async function POST(request) {
         console.log('✅ Recipe created with ID:', recipeId);
 
 
-        if (body.ingredients && body.ingredients.length > 0) {
-            let sortOrder = 0;
-            for (const ingredient of body.ingredients) {
-                if (ingredient.name.trim()) {
+        if (body.ingredients && Array.isArray(body.ingredients) && body.ingredients.length > 0) {
+            console.log('🥬 Adding', body.ingredients.length, 'ingredients...');
+            
+            for (let i = 0; i < body.ingredients.length; i++) {
+                const ingredient = body.ingredients[i];
+                if (ingredient.name && ingredient.name.trim()) {
                     await query(
                         `INSERT INTO ingredients (recipe_id, name, quantity, unit, sort_order) 
                          VALUES (?, ?, ?, ?, ?)`,
@@ -61,36 +67,41 @@ export async function POST(request) {
                             ingredient.name,
                             ingredient.quantity || '',
                             ingredient.unit || '',
-                            sortOrder++
+                            i + 1  
                         ]
                     );
                 }
             }
-            console.log('✅ Ingredients added:', body.ingredients.length);
+            console.log('✅ Ingredients added to ingredients table');
+        } else {
+            console.log('⚠️ No ingredients provided or ingredients is not an array');
         }
 
-
-        if (body.instructions && body.instructions.length > 0) {
-            let stepNumber = 1;
-            for (const instruction of body.instructions) {
-                if (instruction.trim()) {
+        if (body.instructions && Array.isArray(body.instructions) && body.instructions.length > 0) {
+            console.log('📝 Adding', body.instructions.length, 'instructions...');
+            
+            for (let i = 0; i < body.instructions.length; i++) {
+                const instruction = body.instructions[i];
+                if (instruction && instruction.trim()) {
                     await query(
                         `INSERT INTO instructions (recipe_id, step_number, description) 
                          VALUES (?, ?, ?)`,
                         [
                             recipeId,
-                            stepNumber,
+                            i + 1,  
                             instruction
                         ]
                     );
-                    stepNumber++;
                 }
             }
-            console.log('✅ Instructions added:', body.instructions.length);
+            console.log('✅ Instructions added to instructions table');
+        } else {
+            console.log('⚠️ No instructions provided or instructions is not an array');
         }
 
         console.log('🎉 Recipe creation completed successfully');
         return NextResponse.json({ 
+            success: true,
             message: 'Recipe created successfully',
             recipeId: recipeId
         }, { status: 201 });
@@ -98,7 +109,10 @@ export async function POST(request) {
     } catch (error) {
         console.error('❌ Error creating recipe:', error);
         return NextResponse.json(
-            { error: 'Failed to create recipe: ' + error.message },
+            { 
+                success: false,
+                error: 'Failed to create recipe: ' + error.message 
+            },
             { status: 500 }
         );
     }

@@ -209,40 +209,94 @@ export default function RecipeDetail() {
 
     const isRecipeOwner = user && recipe && recipe.user_id === user.id;
 
-    if (loading) return <div className="text-center p-8">Loading...</div>;
-    if (!recipe) return <div className="text-center p-8">Recipe not found</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-recipe-light flex items-center justify-center">
+            <div className="text-center">
+                <div className="w-16 h-16 border-4 border-recipe-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600 font-medium">Loading recipe...</p>
+            </div>
+        </div>
+    );
+    
+    if (!recipe) return (
+        <div className="min-h-screen bg-recipe-light flex items-center justify-center">
+            <div className="text-center p-8">
+                <div className="text-6xl mb-4">🍳</div>
+                <h1 className="text-2xl font-display font-bold text-gray-800 mb-2">Recipe Not Found</h1>
+                <p className="text-gray-600 mb-6">The recipe you're looking for doesn't exist or has been removed.</p>
+                <button
+                    onClick={handleBackToRecipes}
+                    className="btn-primary px-6 py-3"
+                >
+                    Back to Recipes
+                </button>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-4xl mx-auto p-6">
+        <div className="min-h-screen bg-recipe-light py-8 animate-fade-in">
+            <div className="max-w-6xl mx-auto px-4">
 
-                <div className="bg-white rounded-lg shadow-md p-8 relative">
-                    <h1 className="text-4xl font-bold text-gray-800 mb-4 pr-32">{recipe.title}</h1>
-                    <p className="text-gray-600 text-lg mb-6">{recipe.description}</p>
+                <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 relative">
+                    {isRecipeOwner && (
+                        <div className="absolute top-6 right-6">
+                            <button
+                                onClick={handleDeleteRecipe}
+                                disabled={deleting}
+                                className="btn-red px-4 py-2 text-sm"
+                                title="Delete Recipe"
+                            >
+                                {deleting ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Deleting...
+                                    </div>
+                                ) : 'Delete Recipe'}
+                            </button>
+                        </div>
+                    )}
+
+                    <h1 className="text-4xl lg:text-5xl font-display font-bold text-gray-800 mb-4 pr-32">
+                        {recipe.title}
+                    </h1>
                     
-                    <div className="grid grid-cols-3 gap-4 mb-8 text-center">
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="text-2xl font-bold text-orange-600">{recipe.cooking_time}</div>
-                            <div className="text-gray-600">minutes</div>
+                    <p className="text-gray-600 text-lg mb-8 max-w-3xl">{recipe.description}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                        <div className="bg-gradient-to-br from-recipe-primary/10 to-recipe-primary/5 p-6 rounded-xl border border-recipe-primary/20">
+                            <div className="text-3xl font-display font-bold text-recipe-primary mb-2">
+                                {recipe.cooking_time}
+                            </div>
+                            <div className="text-gray-700 font-medium">Minutes</div>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="text-2xl font-bold text-orange-600 capitalize">{recipe.difficulty}</div>
-                            <div className="text-gray-600">difficulty</div>
+                        <div className="bg-gradient-to-br from-recipe-secondary/10 to-recipe-secondary/5 p-6 rounded-xl border border-recipe-secondary/20">
+                            <div className="text-3xl font-display font-bold text-recipe-secondary mb-2 capitalize">
+                                {recipe.difficulty}
+                            </div>
+                            <div className="text-gray-700 font-medium">Difficulty</div>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="text-2xl font-bold text-orange-600">{recipe.servings}</div>
-                            <div className="text-gray-600">servings</div>
+                        <div className="bg-gradient-to-br from-recipe-accent/10 to-recipe-accent/5 p-6 rounded-xl border border-recipe-accent/20">
+                            <div className="text-3xl font-display font-bold text-recipe-dark mb-2">
+                                {recipe.servings}
+                            </div>
+                            <div className="text-gray-700 font-medium">Servings</div>
                         </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <div>
-                            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Ingredients</h2>
-                            <ul className="space-y-3">
+                    <div className="grid lg:grid-cols-2 gap-10">
+                        <div className="bg-recipe-light rounded-xl p-6 border border-gray-200">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-full bg-recipe-primary/20 flex items-center justify-center">
+                                    <span className="text-recipe-primary text-xl">🥕</span>
+                                </div>
+                                <h2 className="text-2xl font-display font-bold text-gray-800">Ingredients</h2>
+                            </div>
+                            <ul className="space-y-4">
                                 {recipe.ingredients.map((ingredient, index) => (
-                                    <li key={index} className="flex justify-between border-b pb-2">
-                                        <span className="text-gray-800">{ingredient.name}</span>
-                                        <span className="text-gray-600">
+                                    <li key={index} className="flex justify-between items-center py-3 border-b border-gray-100 hover:bg-white/50 px-3 rounded-lg transition-colors">
+                                        <span className="text-gray-800 font-medium">{ingredient.name}</span>
+                                        <span className="text-recipe-primary font-semibold bg-recipe-primary/10 px-3 py-1 rounded-full">
                                             {ingredient.quantity} {ingredient.unit}
                                         </span>
                                     </li>
@@ -250,140 +304,194 @@ export default function RecipeDetail() {
                             </ul>
                         </div>
 
-                        <div>
-                            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Instructions</h2>
-                            <ol className="space-y-4">
+                        <div className="bg-recipe-light rounded-xl p-6 border border-gray-200">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-full bg-recipe-secondary/20 flex items-center justify-center">
+                                    <span className="text-recipe-secondary text-xl">👨‍🍳</span>
+                                </div>
+                                <h2 className="text-2xl font-display font-bold text-gray-800">Instructions</h2>
+                            </div>
+                            <ol className="space-y-5">
                                 {recipe.instructions.map((instruction, index) => (
-                                    <li key={index} className="flex">
-                                        <span className="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
-                                            {index + 1}
-                                        </span>
-                                        <span className="text-gray-800">{instruction}</span>
+                                    <li key={index} className="flex gap-5 group">
+                                        <div className="flex-shrink-0">
+                                            <span className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-recipe-primary to-recipe-secondary text-white font-bold text-lg group-hover:scale-110 transition-transform">
+                                                {index + 1}
+                                            </span>
+                                        </div>
+                                        <div className="bg-white p-5 rounded-lg border border-gray-200 flex-1 group-hover:border-recipe-primary/30 transition-colors">
+                                            <p className="text-gray-800 leading-relaxed">{instruction}</p>
+                                        </div>
                                     </li>
                                 ))}
                             </ol>
                         </div>
                     </div>
 
-
-                    <div className="mt-12 border-t pt-8">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-semibold text-gray-800">Reviews</h2>
-                            <button
-                                onClick={() => setShowReviewForm(!showReviewForm)}
-                                className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-                            >
-                                {showReviewForm ? 'Cancel' : 'Add Review'}
-                            </button>
+                    <div className="mt-10 pt-8 border-t border-gray-200 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-recipe-primary/20 to-recipe-secondary/20 flex items-center justify-center">
+                                <span className="text-gray-700 font-bold text-lg">👤</span>
+                            </div>
+                            <div>
+                                <p className="text-gray-600 text-sm">Created by</p>
+                                <p className="text-gray-800 font-semibold text-lg">{recipe.username}</p>
+                            </div>
                         </div>
-
-
-                        {showReviewForm && (
-                            <form onSubmit={handleSubmitReview} className="bg-gray-50 p-6 rounded-lg mb-6">
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Rating
-                                    </label>
-                                    <select
-                                        value={reviewForm.rating}
-                                        onChange={(e) => setReviewForm({...reviewForm, rating: parseInt(e.target.value)})}
-                                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-900"
-                                    >
-                                        {[5, 4, 3, 2, 1].map(num => (
-                                            <option key={num} value={num}>{num} Stars</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Comment
-                                    </label>
-                                    <textarea
-                                        value={reviewForm.comment}
-                                        onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
-                                        rows={3}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-900"
-                                        placeholder="Share your thoughts about this recipe..."
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-                                >
-                                    Submit Review
-                                </button>
-                            </form>
-                        )}
-
-
-                        <div className="space-y-6">
-                            {reviews.length === 0 ? (
-                                <p className="text-gray-500 text-center py-4">No reviews yet. Be the first to review!</p>
-                            ) : (
-                                reviews.map((review) => (
-                                    <div key={review.id} className="border-b pb-4 group hover:bg-gray-50 px-4 py-2 rounded-lg transition-colors">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="font-semibold text-gray-800">{review.username}</span>
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex items-center">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <span
-                                                            key={i}
-                                                            className={i < review.rating ? 'text-yellow-500' : 'text-gray-300 text-lg'}
-                                                        >
-                                                            ★
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                                
-                                                {user && review.user_id === user.id && (
-                                                    <button
-                                                        onClick={() => handleDeleteReview(review.id)}
-                                                        className="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors"
-                                                        title="Delete your review"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <p className="text-gray-700 mb-2">{review.comment}</p>
-                                        <p className="text-gray-500 text-sm">
-                                            {new Date(review.created_at).toLocaleDateString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric',
-                                                year: 'numeric'
-                                            })}
-                                        </p>
-                                    </div>
-                                ))
-                            )}
+                        <div className="text-right">
+                            <p className="text-gray-500 text-sm">Enjoy this recipe?</p>
+                            <p className="text-recipe-primary font-medium">Leave a review below!</p>
                         </div>
-                    </div>
-
-                    <div className="mt-8 pt-6 border-t">
-                        <p className="text-gray-600">By {recipe.username}</p>
                     </div>
                 </div>
 
+                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                        <div>
+                            <h2 className="text-2xl font-display font-bold text-gray-800">Reviews</h2>
+                            <p className="text-gray-600 mt-1">
+                                {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setShowReviewForm(!showReviewForm)}
+                            className="btn-primary px-6 py-3"
+                        >
+                            {showReviewForm ? (
+                                <div className="flex items-center gap-2">
+                                    <span>✕</span>
+                                    Cancel Review
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <span>⭐</span>
+                                    Add Review
+                                </div>
+                            )}
+                        </button>
+                    </div>
 
-                <div className="mt-8 flex justify-center gap-4">
+                    {showReviewForm && (
+                        <form onSubmit={handleSubmitReview} className="enhanced-form mb-8 animate-slide-up">
+                            <h3 className="text-xl font-display font-bold text-gray-800 mb-6">Write Your Review</h3>
+                            
+                            <div className="mb-6">
+                                <label className="form-label">Rating</label>
+                                <div className="flex items-center gap-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setReviewForm({...reviewForm, rating: star})}
+                                            className="text-3xl transition-transform hover:scale-110"
+                                        >
+                                            {star <= reviewForm.rating ? (
+                                                <span className="text-yellow-500">★</span>
+                                            ) : (
+                                                <span className="text-gray-300">☆</span>
+                                            )}
+                                        </button>
+                                    ))}
+                                    <span className="ml-3 text-gray-700 font-medium">{reviewForm.rating} out of 5</span>
+                                </div>
+                            </div>
+                            
+                            <div className="mb-6">
+                                <label className="form-label">Your Comment</label>
+                                <textarea
+                                    value={reviewForm.comment}
+                                    onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                                    rows={4}
+                                    className="form-input"
+                                    placeholder="Share your thoughts about this recipe..."
+                                />
+                            </div>
+                            
+                            <button
+                                type="submit"
+                                className="btn-secondary w-full py-3"
+                            >
+                                Submit Review
+                            </button>
+                        </form>
+                    )}
+
+                    <div className="space-y-6">
+                        {reviews.length === 0 ? (
+                            <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-2xl">
+                                <div className="text-5xl mb-4">⭐</div>
+                                <h3 className="text-xl font-display font-bold text-gray-800 mb-2">No Reviews Yet</h3>
+                                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                                    Be the first to share your experience with this recipe!
+                                </p>
+                                {!showReviewForm && (
+                                    <button
+                                        onClick={() => setShowReviewForm(true)}
+                                        className="btn-outline px-6 py-3"
+                                    >
+                                        Write First Review
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
+                            reviews.map((review) => (
+                                <div key={review.id} className="bg-gray-50 rounded-xl p-6 hover:bg-white border border-gray-200 hover:border-recipe-primary/30 transition-all group">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-recipe-primary/20 to-recipe-secondary/20 flex items-center justify-center">
+                                                <span className="text-gray-700 font-semibold">
+                                                    {review.username.charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-gray-800">{review.username}</p>
+                                                <p className="text-gray-500 text-sm">
+                                                    {new Date(review.created_at).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric'
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center bg-white px-3 py-1 rounded-full border border-gray-200">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <span
+                                                        key={i}
+                                                        className={i < review.rating ? 'text-yellow-500 text-lg' : 'text-gray-300 text-lg'}
+                                                    >
+                                                        ★
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            
+                                            {user && review.user_id === user.id && (
+                                                <button
+                                                    onClick={() => handleDeleteReview(review.id)}
+                                                    className="text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors opacity-0 group-hover:opacity-100"
+                                                    title="Delete your review"
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                <div className="mt-10 flex justify-center">
                     <button
                         onClick={handleBackToRecipes}
-                        className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold"
+                        className="btn-outline px-8 py-3 text-lg"
                     >
-                        Back to Recipes
+                        ← Back to Recipes
                     </button>
-                    
-                    {isRecipeOwner && (
-                        <button
-                            onClick={handleDeleteRecipe}
-                            disabled={deleting}
-                            className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 disabled:bg-red-300 transition-colors font-semibold"
-                        >
-                            {deleting ? 'Deleting...' : 'Delete Recipe'}
-                        </button>
-                    )}
                 </div>
             </div>
         </div>

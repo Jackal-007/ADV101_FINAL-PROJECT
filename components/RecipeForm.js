@@ -1,9 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; 
 import { useAuth } from '../context/AuthContext';
 
-export default function RecipeForm({ onSuccess }) {
-    const { user } = useAuth();
+
+export default function RecipeForm({ 
+    onSuccess, 
+    editing = false, 
+    recipeId = '',  
+    initialData      
+}) {
+    const { user, token } = useAuth();
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -17,6 +23,39 @@ export default function RecipeForm({ onSuccess }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+
+    const method = editing ? 'PUT' : 'POST';
+
+    useEffect(() => {
+        if (editing && recipeId) {
+            fetchRecipeData();
+        }
+    }, [editing, recipeId]);
+
+    const fetchRecipeData = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch(`/api/recipes/${recipeId}`);
+            if (res.ok) {
+                const recipe = await res.json();
+                setFormData({
+                    title: recipe.title || '',
+                    description: recipe.description || '',
+                    cookingTime: recipe.cooking_time?.toString() || '',
+                    difficulty: recipe.difficulty?.toLowerCase() || 'easy',
+                    servings: recipe.servings?.toString() || '',
+                    ingredients: recipe.ingredients || [{ name: '', quantity: '', unit: '' }],
+                    instructions: recipe.instructions || [''],
+                    recipeImage: recipe.recipe_image || null
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching recipe:', error);
+            setError('Failed to load recipe data');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleChange = (e) => {
         setFormData({
@@ -83,10 +122,10 @@ export default function RecipeForm({ onSuccess }) {
         );
 
         try {
-            let imageUrl = null;
+            let imageUrl = formData.recipeImage;
             
 
-            if (formData.recipeImage) {
+            if (formData.recipeImage && typeof formData.recipeImage !== 'string') {
                 const imageFormData = new FormData();
                 imageFormData.append('file', formData.recipeImage);
                 
@@ -107,31 +146,33 @@ export default function RecipeForm({ onSuccess }) {
                 ...formData,
                 ingredients: filteredIngredients,
                 instructions: filteredInstructions,
-                cookingTime: parseInt(formData.cookingTime),
+                cooking_time: parseInt(formData.cookingTime),
                 servings: parseInt(formData.servings),
-                user_id: user.id,
-                recipeImage: imageUrl
+                recipe_image: imageUrl
             };
 
             console.log('🔍 Submitting recipe with user_id:', user.id);
 
-            const response = await fetch('/api/recipes/create', {
-                method: 'POST',
+            const endpoint = editing ? `/api/recipes/${recipeId}` : '/api/recipes/create';
+
+            const response = await fetch(endpoint, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(submitData)
             });
 
             if (!response.ok) {
-                throw new Error('Failed to create recipe');
+                const errorText = await response.text();
+                throw new Error(`Failed to ${editing ? 'update' : 'create'} recipe: ${errorText}`);
             }
 
             const result = await response.json();
-            onSuccess(result.recipeId);
+            onSuccess(editing ? recipeId : result.recipeId || result.id);
             
-
+        if (!editing) { 
             setFormData({
                 title: '',
                 description: '',
@@ -142,6 +183,7 @@ export default function RecipeForm({ onSuccess }) {
                 instructions: [''],
                 recipeImage: null
             });
+        }
             
         } catch (err) {
             setError(err.message);
@@ -189,12 +231,22 @@ export default function RecipeForm({ onSuccess }) {
     };
 
     return (
-        <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Create New Recipe</h2>
+        <div className="max-w-4xl mx-auto enhanced-form animate-slide-up">
+            <h2 className="text-3xl font-display font-bold text-gray-800 mb-2 text-center">
+                {editing ? 'Edit Recipe' : 'Create New Recipe'}
+            </h2>
+            <p className="text-gray-600 text-center mb-8">
+                {editing ? 'Update your recipe details' : 'Share your culinary masterpiece with the community'}
+            </p>
             
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-                    {error}
+                <div className="alert-error mb-6 animate-slide-up">
+                    <div className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        {error}
+                    </div>
                 </div>
             )}
 
@@ -211,7 +263,7 @@ export default function RecipeForm({ onSuccess }) {
                             value={formData.title}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900"
+                            className="form-input"
                             placeholder="Enter recipe title"
                         />
                     </div>
@@ -224,7 +276,7 @@ export default function RecipeForm({ onSuccess }) {
                             type="file"
                             accept="image/*"
                             onChange={handleImageChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900"
+                            className="form-input"
                         />
                         {formData.recipeImage && (
                             <p className="text-green-600 text-sm mt-2">
@@ -243,7 +295,7 @@ export default function RecipeForm({ onSuccess }) {
                             onChange={handleChange}
                             required
                             rows={3}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900"
+                            className="form-input"
                             placeholder="Brief description of your recipe"
                         />
                     </div>
@@ -260,7 +312,7 @@ export default function RecipeForm({ onSuccess }) {
                                 onChange={handleChange}
                                 required
                                 min="1"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900"
+                                className="form-input"
                                 placeholder="15"
                             />
                         </div>
@@ -273,7 +325,7 @@ export default function RecipeForm({ onSuccess }) {
                                 name="difficulty"
                                 value={formData.difficulty}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900"
+                                className="form-input"
                             >
                                 <option value="easy" className="text-gray-900">Easy</option>
                                 <option value="medium" className="text-gray-900">Medium</option>
@@ -292,7 +344,7 @@ export default function RecipeForm({ onSuccess }) {
                                 onChange={handleChange}
                                 required
                                 min="1"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900"
+                                className="form-input"
                                 placeholder="4"
                             />
                         </div>
@@ -308,7 +360,7 @@ export default function RecipeForm({ onSuccess }) {
                         <button
                             type="button"
                             onClick={addIngredient}
-                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                            className="btn-green px-4 py-2 text-sm"
                         >
                             + Add Ingredient
                         </button>
@@ -323,7 +375,7 @@ export default function RecipeForm({ onSuccess }) {
                                         placeholder="Ingredient name"
                                         value={ingredient.name}
                                         onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-900"
+                                        className="form-input"
                                     />
                                     <input
                                         type="text"
@@ -362,7 +414,7 @@ export default function RecipeForm({ onSuccess }) {
                         <button
                             type="button"
                             onClick={addInstruction}
-                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                            className="btn-green px-4 py-2 text-sm"
                         >
                             + Add Step
                         </button>
@@ -381,7 +433,7 @@ export default function RecipeForm({ onSuccess }) {
                                             value={instruction}
                                             onChange={(e) => handleInstructionChange(index, e.target.value)}
                                             rows={2}
-                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-900"
+                                            className="form-input flex-1"
                                         />
                                     </div>
                                 </div>
@@ -403,9 +455,9 @@ export default function RecipeForm({ onSuccess }) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-orange-600 text-white py-4 px-6 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-semibold transition-colors"
+                        className="btn-primary w-full py-4 px-6 text-lg font-semibold"
                     >
-                        {loading ? 'Creating Recipe...' : 'Create Recipe'}
+                        {loading ? (editing ? 'Updating Recipe...' : 'Creating Recipe...') : (editing ? 'Update Recipe' : 'Create Recipe')}
                     </button>
                 </div>
             </form>
